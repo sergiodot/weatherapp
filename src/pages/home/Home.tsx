@@ -16,29 +16,18 @@ const username = 'udi_dominguez';
 const password = 'FKh50iPx48';
 
 export default function Home() {
-  const [value, setValue] = React.useState<string>('');
+  const [date, setDate] = React.useState<Date | null>(new Date());
   const [weather, setWeather] = React.useState(UserEmptyState);
   const getWeather = async () => {
-    axios.get(`https://api.meteomatics.com/${value}/t_2m:C/52.520551,13.461804/json`, {
-      withCredentials: true,
-      auth: {
-        username,
-        password
-      }
-    })
-      .then((res: any) => {
-        setWeather(WeatherAdapter(res.data.data[0]));
-      })
-      .catch(function (error: any) {
-        console.log(error);
-      });
+    const result = await fetchWeather(date?.toISOString());
+    setWeather(result);
   }
 
   const showText = (value: any[]) => {
-    return value.map((val, key) => <p key={key}>{val.value}     {splitText()}</p>);
+    return value.map((val, key) => <p key={key}>{val.value}{splitText()}</p>);
   }
 
-  const splitText = ():string => {
+  const splitText = (): string => {
     return weather.parameter.split("")[weather.parameter.length - 1]
   }
 
@@ -49,9 +38,9 @@ export default function Home() {
           <DateTimePicker
             renderInput={(props) => <TextField {...props} />}
             label="DateTimePicker"
-            value={value}
-            onChange={(newValue: any) => {
-              setValue(newValue?.toISOString());
+            value={date}
+            onChange={newValue => {
+              setDate(newValue);
             }}
           />
         </LocalizationProvider>
@@ -59,10 +48,10 @@ export default function Home() {
       </div>
       <div className='contentResultTemp'>
         <ThermostatAutoIcon></ThermostatAutoIcon>
-        {weather.coordinates.map((coor, key) => <div key={key}>{showText(coor['dates'])}</div>)}
+        {weather.coordinates?.map((coor, key) => <div key={key}>{showText(coor['dates'])}</div>)}
       </div>
       <img src={Logo} />
-      
+
     </div>
   );
 }
